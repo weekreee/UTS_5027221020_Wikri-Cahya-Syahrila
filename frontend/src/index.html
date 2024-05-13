@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>LokerIT</title>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <div class="container mx-auto">
+        <!-- Add Reminder Form -->
+        <div class="mx-6">
+            <h2 class="mt-8 text-xl font-semibold text-center">Add Your Reminder</h2>
+            <form id="addReminderForm" class="mt-4">
+                <label for="id" class="block">ID:</label>
+                <input type="text" id="id" name="id" class="border border-gray-300 bg-gray-700 h-10 px-3 rounded-lg text-sm w-full mt-1 text-white"><br>
+                <label for="title" class="block">Title:</label>
+                <input type="text" id="title" name="title" class="border border-gray-300 bg-gray-700 h-10 px-3 rounded-lg text-sm w-full mt-1 text-white"><br>
+                <label for="deadline" class="block">Deadline:</label>
+                <input type="date" id="deadline" name="deadline" class="border border-gray-300 bg-gray-700 h-10 px-3 rounded-lg text-sm w-full mt-1 text-white"><br>
+                <label for="category" class="block">Category:</label>
+                <input type="text" id="category" name="category" class="border border-gray-300 bg-gray-700 h-10 px-3 rounded-lg text-sm w-full mt-1 text-white"><br>
+                <label for="deskripsi" class="block">Deskripsi:</label>
+                <input type="text" id="deskripsi" name="deskripsi" class="border border-gray-300 bg-gray-700 h-10 px-3 rounded-lg text-sm w-full mt-1 text-white"><br>
+                <div class="text-center">
+                    <button type="button" onclick="addReminder()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">Add Reminder</button>
+                </div>
+            </form>
+        </div>
+    
+
+        <div class="container mx-auto py-8 flex flex-col items-center" id="reminders">
+            <!-- Get All Reminders Button -->
+            <h2 class="text-xl font-semibold">Get All Reminders</h2>
+            <button type="button" onclick="getAllReminders()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4">Get All Reminders</button>
+        
+            <!-- Display All Reminders -->
+            <h2 class="text-xl font-semibold mt-8">All Reminders</h2>
+            <ul id="reminderList" class="mt-4"></ul>
+        </div>
+
+    <!-- JavaScript Code -->
+    <script>
+        function addReminder() {
+            var id = document.getElementById("id").value;
+            var title = document.getElementById("title").value;
+            var company = document.getElementById("company").value;
+            var category = document.getElementById("category").value;
+            var deskripsi = document.getElementById("deskripsi").value;
+
+            // Send request to backend server to add reminder
+            fetch('/addReminder', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: id,
+                    title: title,
+                    company: company,
+                    category: category,
+                    deskripsi: deskripsi
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getAllReminders() {
+            // Send request to backend server to get all reminders
+            fetch('/allReminder') 
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                var reminderList = document.getElementById("reminderList");
+                reminderList.innerHTML = "";
+                data.reminders.forEach(reminder => { 
+                    var listItem = document.createElement("li");
+                    listItem.textContent = `ID: ${reminder.id}, Title: ${reminder.title}, Company: ${reminder.company}, Category: ${reminder.category}, Deskripsi: ${reminder.deskripsi}`;
+                    reminderList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getReminderByTitle() {
+            var reminderTitle = document.getElementById("reminderTitle").value;   
+            // Send request to backend server to get reminder by title
+            fetch(`/reminder/${reminderTitle}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Reminder not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                var reminderList = document.getElementById("searchResult");
+                reminderList.innerHTML = "";
+                var listItem = document.createElement("li");
+                listItem.textContent = `Title: ${data.title}, Company: ${data.company}, Category: ${data.category}, Deskripsi: ${data.deskripsi}`;
+                reminderList.appendChild(listItem);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Reminder not found');
+            });
+        }
+
+        function deleteReminderById() {
+            var reminderId = document.getElementById("deleteReminderId").value;
+            fetch(`/deleteReminder/${reminderId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); 
+                alert("Reminder deleted successfully!");
+                getAllReminders();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Failed to delete reminder.");
+            });
+        }
+        
+    </script>
+</body>
+</html>

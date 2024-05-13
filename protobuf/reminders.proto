@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+// python -m grpc_tools.protoc --proto_path=protobuf --python_out=backend --grpc_python_out=backend protobuf/reminders.proto  
+
+message Reminder {
+  string id = 1;
+  string title = 2;
+  string deadline = 3;
+  string category = 4;
+  string deskripsi = 5;
+}
+
+message ReminderList {
+  repeated Reminder reminders = 1;
+}
+
+message ReminderTitle {
+  string title = 1;
+}
+
+message ReminderId {
+  string id = 1;
+}
+
+message Empty {}
+
+
+service ReminderService {
+// CRUD Database
+  rpc AddReminder (Reminder) returns (Reminder) {}
+  rpc GetAll (Empty) returns (ReminderList) {}
+  rpc GetReminder (ReminderTitle) returns (Reminder) {}
+  rpc UpdateReminder (Reminder) returns (Reminder) {}
+  rpc DeleteReminder (ReminderId) returns (Empty) {}
+}
